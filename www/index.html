@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shared Canvas</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <script type="text/javascript" src="canvas.js"></script>
+    <script type="text/javascript" src="inputManager.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+<body>
+    <h1 align="center">Shared Canvas</h1><br>
+    <div id="canvas-container">
+        <input type="button" value="Send" onclick="requestChangeUsername()">
+        <input type="text" id="username" value="Type new username here" onclick="clearTextboxUsername()"><br>
+        <canvas id="Canvas">Your browser doesn't support canvas</canvas>
+    </div>
+
+    <script>
+        //Set Canvas
+        const canvas = document.getElementById("Canvas");
+        const textbox_username = document.getElementById("username");
+
+        const socketio = io();
+        
+        const signal_original = "CB230126200000084030000000000000ED00";
+        let digits = new Array(9).fill(0);
+        let parameter = "";
+
+        const log = (logText) => {socketio.emit("log", logText);}
+        const drawStart = (x,y) => {socketio.emit("drawStart", {"x":x,"y":y});}
+        const drawMove  = (x,y) => {socketio.emit("drawMove" , {"x":x,"y":y});}
+        const drawEnd   = (x,y) => {socketio.emit("drawEnd"  , {"x":x,"y":y});}
+        socketio.on('sign', function(msg){
+            log(msg);
+        })
+        socketio.on("addline",function(xyData){
+            addline(xyData);
+        });
+
+        initCanvas();
+        initEventlistener();
+
+        const requestChangeUsername = () => {
+            socketio.emit("changeUsername",textbox_username.value);
+        }
+        const clearTextboxUsername = () =>{
+            textbox_username.value = "";
+        }
+    </script>
+</body>
+</html>
