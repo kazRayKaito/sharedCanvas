@@ -12,7 +12,7 @@
     <h1 align="center">Shared Canvas</h1><br>
     <div id="canvas-container">
         <input type="button" value="Send" onclick="requestChangeUsername()">
-        <input type="text" id="username" value="Type new username here" onclick="clearTextboxUsername()"><br>
+        <input type="text" id="username" value="Type new username here"><br>
         <canvas id="Canvas">Your browser doesn't support canvas</canvas>
     </div>
 
@@ -21,9 +21,18 @@
         const canvas = document.getElementById("Canvas");
         const textbox_username = document.getElementById("username");
 
-        const socketio = io();
+        let userName = "un-known user";
+        const savedUsername = localStorage.getItem("userName");
+        if (savedUsername){
+            textbox_username.value = savedUsername;
+            userName = savedUsername;
+        }
+        const socketio = io({
+            query:{
+                initialUserName:userName
+            }
+        });
         
-        const signal_original = "CB230126200000084030000000000000ED00";
         let digits = new Array(9).fill(0);
         let parameter = "";
 
@@ -33,7 +42,7 @@
         const drawEnd   = (x,y) => {socketio.emit("drawEnd"  , {"x":x,"y":y});}
         socketio.on('sign', function(msg){
             log(msg);
-        })
+        });
         socketio.on("addline",function(xyData){
             addline(xyData);
         });
@@ -43,9 +52,7 @@
 
         const requestChangeUsername = () => {
             socketio.emit("changeUsername",textbox_username.value);
-        }
-        const clearTextboxUsername = () =>{
-            textbox_username.value = "";
+            localStorage.setItem("userName", textbox_username.value);
         }
     </script>
 </body>

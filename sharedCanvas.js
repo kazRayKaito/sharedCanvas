@@ -13,37 +13,29 @@ app.get('/', function(req, res) {
 });
 
 io.on("connection", function(socket){
-    addNewUser(socket.id);
+    const initialUserName = socket.handshake.query.initialUserName;
+    addNewUser(socket.id, initialUserName);
     console.log("Connected:" + userNameHash[socket.id]);
-    socket.on("signal", function(signal){
-        console.log("Socket.on:signal");
-        io.emit("sign", signal);
-    });
     socket.on("log", function(logText){
         console.log(userNameHash[socket.id]+":"+logText);
     });
     socket.on("drawStart", (xy) => {
-        //console.log(userNameHash[socket.id]+":drawStart("+xy.x+","+xy.y+")")
         lineStart(socket.id, xy);
     });
     socket.on("drawMove", (xy) => {
-        //console.log(userNameHash[socket.id]+":drawMove ("+xy.x+","+xy.y+")")
         lineMove(socket.id, xy);
     });
     socket.on("drawEnd", (xy) => {
-        //console.log(userNameHash[socket.id]+":drawEnd  ("+xy.x+","+xy.y+")")
         lineMove(socket.id, xy);
     });
     socket.on("disconnect", () => {
         console.log("Disconnected:" + userNameHash[socket.id]);
-        //Do not delete user because I want to leave the drawings
-        //deleteUser(socket.id);
-    })
+    });
     socket.on("changeUsername", (newName)=>{
         const oldName = userNameHash[socket.id];
         changeUsername(socket.id, newName);
         console.log("New Name: " + oldName + " > " + userNameHash[socket.id]);
-    })
+    });
 })
 
 http.listen(PORT, function(){
@@ -69,14 +61,10 @@ const lineMove = (socketid, xy) => {
 
 let userNameHash = {"socketID":"Username"};
 
-const addNewUser = (socketid) => {
+const addNewUser = (socketid, userName) => {
     if(userNameHash[socketid] == undefined){
-        userNameHash[socketid] = "un-named user";
+        userNameHash[socketid] = userName;
     }
-}
-
-const deleteUser = (socketid) => {
-    delete userNameHash[socketid];
 }
 
 const changeUsername = (socketid,newUsername) => {

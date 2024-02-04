@@ -10,6 +10,9 @@ const initEventlistener = () => {
     canvas.addEventListener('touchmove', moveIn, false);
     canvas.addEventListener('mouseup', releaseIn, false);
     canvas.addEventListener('touchend', releaseIn, false);
+    textbox_username.addEventListener('mousedown', clearField, false);
+    textbox_username.addEventListener('touchstart', clearField, false);
+    textbox_username.addEventListener('keyup', enterPressed, false);
 }
 
 const touchIn=(event)=>{
@@ -57,6 +60,15 @@ const release = (x,y) => {
     touching = false;
     drawEnd(x,y);
     log("pixelRatio:"+pixelRatio);
+}
+const clearField = () => {
+	textbox_username.value = "";
+}
+const enterPressed = (event) => {
+	if(event.key === "Enter"){
+		requestChangeUsername();
+		textbox_username.blur();
+	}
 }
 
 console.log("Loaded: canvas.js");
